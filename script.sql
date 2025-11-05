@@ -86,6 +86,7 @@ CREATE TABLE Maquinaria (
     fecha_adquisicion DATE,
     estado_actual INT NOT NULL DEFAULT 0, -- (Ej. "Operativa", "En Mantenimiento")
     horometro_actual DECIMAL(10, 2) NOT NULL DEFAULT 0.0,
+    horometro_ultimo_mtto DECIMAL(10, 2) NOT NULL DEFAULT 0.0,
     horometro_prox_mtto DECIMAL(10, 2) NOT NULL DEFAULT 0.0,
     FOREIGN KEY (frente_id) REFERENCES Frentes(frente_id) ON DELETE SET NULL,
 	FOREIGN KEY (estado_actual) REFERENCES estado(id_estado) ON DELETE SET NULL

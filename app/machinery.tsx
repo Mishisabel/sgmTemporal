@@ -294,8 +294,8 @@ function MaquinariaFormModal({
 
 
   const handleSave = async () => {
-    if (!formData.codigoActivo || !formData.nombreEquipo) {
-      setError("Código Activo y Nombre Equipo son obligatorios");
+    if (!formData.codigoActivo ) {
+      setError("Código Activo es obligatorio");
       return;
     }
 
@@ -305,7 +305,7 @@ function MaquinariaFormModal({
     try {
       // Construye el payload con todos los campos requeridos por Omit<Maquinaria, 'id'>
       const payload: Omit<Maquinaria, "id"> = {
-        nombre: formData.nombreEquipo,
+        nombre: "Cosechadora",
         codigo: formData.codigoActivo,
         frente: formData.frente,
         modelo: formData.modelo,
@@ -444,7 +444,7 @@ function MaquinariaFormModal({
                   />
                 </View>
                 {/* Nombre Equipo */}
-                <View style={modalStyles.inputGroup}>
+                {/* <View style={modalStyles.inputGroup}>
                   <Text style={modalStyles.label}>Nombre Equipo</Text>
                   <TextInput
                     style={modalStyles.input}
@@ -456,7 +456,7 @@ function MaquinariaFormModal({
                     }
                     editable={!isLoading}
                   />
-                </View>
+                </View> */}
 
                 {/* Modelo */}
                 <View style={modalStyles.inputGroup}>
