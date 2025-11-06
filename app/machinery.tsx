@@ -16,9 +16,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Menu, Plus, Search, Filter, Bell } from "lucide-react-native";
 import Colors from "@/constants/colors";
 import { apiService } from "@/services/apiService";
-import type { Maquinaria, MaquinariaEstado } from "@/types";
+import type { Maquinaria } from "@/types";
 import Sidebar from "@/components/Sidebar";
-
+import NotificationPanel from "@/components/NotificationPanel";
+import NewWorkOrderModal from "@/components/NewWorkOrderModal";
+import { useAuth } from "@/contexts/AuthContext";
 import StatusBadge from "@/components/StatusBadge";
 import MantenimientoBadge from "@/components/statusMantenimiento";
 import { Image } from "expo-image";
@@ -29,8 +31,19 @@ export default function MachineryScreen() {
   const insets = useSafeAreaInsets();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(isWeb);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const { currentUser } = useAuth();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isFormModalVisible, setIsFormModalVisible] = useState(false);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
+
+  const [isWOMoalVisible, setIsWOModalVisible] = useState(false);
+  const [selectedMachine, setSelectedMachine] = useState<Maquinaria | null>(null);
+
+const handleMachinePress = (maq: Maquinaria) => {
+    setSelectedMachine(maq);
+    setIsWOModalVisible(true);
+  };
 
   const { data: notificaciones } = useQuery({
     queryKey: ["notificaciones"],
@@ -56,7 +69,8 @@ export default function MachineryScreen() {
       m.estado_actual.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.horometro_actual.toString().includes(searchQuery.toString()) ||
       m.proximomantenimiento.toString().includes(searchQuery.toString()) ||
-      m.horometro_ultimo_mtto.toString().includes(searchQuery.toString())
+      m.horometro_ultimo_mtto.toString().includes(searchQuery.toString()) ||
+      m.maquinaria_id.toString().includes(searchQuery.toString())
   );
   console.log("Maquinaria filtrada:", filteredMaquinaria);
 
@@ -83,7 +97,10 @@ export default function MachineryScreen() {
 
           <Text style={styles.headerTitle}>Maquinaria</Text>
           <View style={styles.headerActions}>
-            <Pressable style={styles.iconButton}>
+            <Pressable
+              style={styles.iconButton}
+              onPress={() => setIsPanelVisible(true)}
+            >
               <Bell size={20} color={Colors.industrial.textSecondary} />
               {unreadCount > 0 && (
                 <View style={styles.badge}>
@@ -129,7 +146,7 @@ export default function MachineryScreen() {
           ) : (
             <View style={styles.grid}>
               {filteredMaquinaria?.map((maq) => (
-                <Pressable key={maq.id} style={styles.card}>
+                <Pressable key={maq.maquinaria_id} style={styles.card} onPress={() => handleMachinePress(maq)}>
                   {maq.imagenUrl && (
                     <Image
                       source={{ uri: maq.imagenUrl }}
@@ -203,6 +220,24 @@ export default function MachineryScreen() {
           )}
         </ScrollView>
       </View>
+
+      <MaquinariaFormModal
+        visible={isFormModalVisible}
+        onClose={() => setIsFormModalVisible(false)}
+        onSave={handleSaveSuccess}
+      />
+
+      {/* --- AÑADE EL NUEVO MODAL AL FINAL --- */}
+      <NewWorkOrderModal
+        visible={isWOMoalVisible}
+        onClose={() => setIsWOModalVisible(false)}
+        onSave={handleSaveSuccess} // Reutilizamos la función de refrescar
+        maquinaria={selectedMachine}
+        user={currentUser}
+      />
+      {isPanelVisible && (
+        <NotificationPanel onClose={() => setIsPanelVisible(false)} />
+      )}
 
       <MaquinariaFormModal
         visible={isModalVisible}
@@ -363,6 +398,7 @@ function MaquinariaFormModal({
         proximomantenimiento: 0,
         horometro_prox_mtto: 0,
         horometro_ultimo_mtto: 0,
+        maquinaria_id: 0
       };
 
       console.log("Payload a enviar:", payload);

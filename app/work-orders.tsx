@@ -7,24 +7,26 @@ import Colors from '@/constants/colors';
 import { apiService } from '@/services/apiService';
 import Sidebar from '@/components/Sidebar';
 import StatusBadge from '@/components/StatusBadge';
+import NotificationPanel from '@/components/NotificationPanel';
 
 const isWeb = Platform.OS === 'web';
 
 export default function WorkOrdersScreen() {
   const insets = useSafeAreaInsets();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(isWeb);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
   const { data: ordenes, isLoading } = useQuery({
     queryKey: ['ordenes-trabajo'],
     queryFn: () => apiService.getOrdenesTrabajo(),
   });
 
-     const { data: notificacion } = useQuery({
-      queryKey: ["notificaciones"],
-      queryFn: () => apiService.getNotificaciones(),
-    });
-    const unreadCount = notificacion?.filter((n) => !n.leida).length || 0;
-  
+const { data: notificaciones } = useQuery({
+    queryKey: ['notificaciones'],
+    queryFn: () => apiService.getNotificaciones(),
+  });
+  const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
+
   return (
     <View style={styles.container}>
       {sidebarOpen && <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
@@ -40,7 +42,7 @@ export default function WorkOrdersScreen() {
           <Text style={styles.headerTitle}>Órdenes de Trabajo</Text>
         
         <View style={styles.headerActions}>
-            <Pressable style={styles.iconButton}>
+            <Pressable style={styles.iconButton} onPress={() => setIsPanelVisible(true)}>
               <Bell size={20} color={Colors.industrial.textSecondary} />
               {unreadCount > 0 && (
                 <View style={styles.badge}>
@@ -80,8 +82,11 @@ export default function WorkOrdersScreen() {
             ))
           )}
         </ScrollView>
-      </View>
+        {isPanelVisible && (
+        <NotificationPanel onClose={() => setIsPanelVisible(false)} />
+      )}
     </View>
+      </View>
   );
 }
 

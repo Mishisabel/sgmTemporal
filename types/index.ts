@@ -36,7 +36,7 @@ export interface Maquinaria {
   horometro_ultimo_mtto: number;
   proximomantenimiento: number;
   nombre_frente: string;
-  
+  maquinaria_id :number;
   
 
 }

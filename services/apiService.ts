@@ -55,6 +55,28 @@ export const apiService = {
     }
   },
 
+  async createOrdenInicioMtto(data: {
+    maquinariaId: string;
+    descripcionFalla: string;
+    fechaInicio: string;
+  }): Promise<OrdenTrabajo> {
+    try {
+      const response = await axios.post(
+        `${API_URL}/ordenes/inicio-mtto`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error creating work order:", error);
+      throw error.response?.data || new Error("Error creating work order");
+    }
+  },
+
   async getFrentes(): Promise<string[]> {
     try {
       const response = await axios.get(`${API_URL}/maquinaria/frentes`, {
@@ -278,8 +300,6 @@ export const apiService = {
     await delay(200);
 
     // 2. Obtenemos las notificaciones estáticas (Stock, OT Completada, etc.)
-    const staticNotifications = [...MOCK_NOTIFICACIONES];
-
     try {
       // 3. Obtenemos las notificaciones dinámicas del horómetro desde el backend
       const response = await axios.get(`${API_URL}/notificaciones/horometro`, {
@@ -291,7 +311,7 @@ export const apiService = {
       const horometerNotifications: Notificacion[] = response.data;
 
       // 4. Combinamos ambas listas
-      const allNotifications = [...staticNotifications, ...horometerNotifications];
+      const allNotifications = [...horometerNotifications];
 
       // 5. Ordenamos todas por fecha y las devolvemos
       return allNotifications.sort(

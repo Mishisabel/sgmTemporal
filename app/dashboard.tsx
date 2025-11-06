@@ -1,39 +1,54 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Platform, Pressable, ScrollView, Dimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
-import { Menu, Bell, Search } from 'lucide-react-native';
-import Colors from '@/constants/colors';
-import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/apiService';
-import Sidebar from '@/components/Sidebar';
-import KPICard from '@/components/KPICard';
-import StatusBadge from '@/components/StatusBadge';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  Pressable,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
+import { Menu, Bell, Search } from "lucide-react-native";
+import Colors from "@/constants/colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiService } from "@/services/apiService";
+import Sidebar from "@/components/Sidebar";
+import KPICard from "@/components/KPICard";
+import StatusBadge from "@/components/StatusBadge";
+import NotificationPanel from '@/components/NotificationPanel';
 
-const { width } = Dimensions.get('window');
-const isWeb = Platform.OS === 'web';
+const { width } = Dimensions.get("window");
+const isWeb = Platform.OS === "web";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { currentUser } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(isWeb);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
   const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ['dashboard', currentUser?.rol],
-    queryFn: () => apiService.getDashboardData(currentUser?.rol || ''),
+    queryKey: ["dashboard", currentUser?.rol],
+    queryFn: () => apiService.getDashboardData(currentUser?.rol || ""),
     enabled: !!currentUser,
   });
 
   const { data: notificaciones } = useQuery({
-    queryKey: ['notificaciones'],
+    queryKey: ["notificaciones"],
     queryFn: () => apiService.getNotificaciones(),
   });
 
   const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
 
-  if (currentUser?.rol === 'Operador') {
+  if (currentUser?.rol === "Operador") {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: insets.top, paddingBottom: insets.bottom },
+        ]}
+      >
         <View style={[styles.header, { paddingTop: insets.top }]}>
           <Text style={styles.headerTitle}>Panel del Operador</Text>
         </View>
@@ -43,11 +58,17 @@ export default function DashboardScreen() {
             <View style={styles.operatorButtons}>
               <Pressable style={styles.operatorButton}>
                 <Text style={styles.operatorButtonText}>⏱️</Text>
-                <Text style={styles.operatorButtonLabel}>Actualizar Horómetro</Text>
+                <Text style={styles.operatorButtonLabel}>
+                  Actualizar Horómetro
+                </Text>
               </Pressable>
-              <Pressable style={[styles.operatorButton, styles.operatorButtonDanger]}>
+              <Pressable
+                style={[styles.operatorButton, styles.operatorButtonDanger]}
+              >
                 <Text style={styles.operatorButtonText}>⚠️</Text>
-                <Text style={styles.operatorButtonLabel}>Reportar Incidencia</Text>
+                <Text style={styles.operatorButtonLabel}>
+                  Reportar Incidencia
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -58,23 +79,28 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      {sidebarOpen && <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
-      
+      {sidebarOpen && (
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      )}
+
       <View style={styles.mainContent}>
         <View style={[styles.header, { paddingTop: insets.top }]}>
           {!isWeb && (
-            <Pressable onPress={() => setSidebarOpen(!sidebarOpen)} style={styles.menuButton}>
+            <Pressable
+              onPress={() => setSidebarOpen(!sidebarOpen)}
+              style={styles.menuButton}
+            >
               <Menu size={24} color={Colors.industrial.text} />
             </Pressable>
           )}
-          
+
           <Text style={styles.headerTitle}>Dashboard</Text>
-          
+
           <View style={styles.headerActions}>
             <Pressable style={styles.iconButton}>
               <Search size={20} color={Colors.industrial.textSecondary} />
             </Pressable>
-            <Pressable style={styles.iconButton}>
+            <Pressable style={styles.iconButton} onPress={() => setIsPanelVisible(true)}>
               <Bell size={20} color={Colors.industrial.textSecondary} />
               {unreadCount > 0 && (
                 <View style={styles.badge}>
@@ -85,7 +111,7 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        <ScrollView 
+        <ScrollView
           style={styles.content}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
@@ -99,8 +125,8 @@ export default function DashboardScreen() {
               {dashboardData?.kpis && dashboardData.kpis.length > 0 && (
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>KPIs</Text>
-                  <ScrollView 
-                    horizontal 
+                  <ScrollView
+                    horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.kpiContainer}
                   >
@@ -111,32 +137,53 @@ export default function DashboardScreen() {
                 </View>
               )}
 
-              {dashboardData?.ordenesAbiertas && dashboardData.ordenesAbiertas.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Órdenes de Trabajo Abiertas</Text>
-                  <View style={styles.card}>
-                    {dashboardData.ordenesAbiertas.map((orden) => (
-                      <View key={orden.id} style={styles.listItem}>
-                        <View style={styles.listItemHeader}>
-                          <Text style={styles.listItemTitle}>{orden.id}</Text>
-                          <StatusBadge status={orden.prioridad} type="prioridad" size="small" />
+              {dashboardData?.ordenesAbiertas &&
+                dashboardData.ordenesAbiertas.length > 0 && (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>
+                      Órdenes de Trabajo Abiertas
+                    </Text>
+                    <View style={styles.card}>
+                      {dashboardData.ordenesAbiertas.map((orden) => (
+                        <View key={orden.id} style={styles.listItem}>
+                          <View style={styles.listItemHeader}>
+                            <Text style={styles.listItemTitle}>{orden.id}</Text>
+                            <StatusBadge
+                              status={orden.prioridad}
+                              type="prioridad"
+                              size="small"
+                            />
+                          </View>
+                          <Text style={styles.listItemSubtitle}>
+                            {orden.maquinariaNombre}
+                          </Text>
+                          <Text
+                            style={styles.listItemDescription}
+                            numberOfLines={2}
+                          >
+                            {orden.descripcionProblema}
+                          </Text>
+                          <View style={styles.listItemFooter}>
+                            <StatusBadge
+                              status={orden.estado}
+                              type="orden"
+                              size="small"
+                            />
+                            <Text style={styles.listItemDate}>
+                              {orden.fechaCreacion}
+                            </Text>
+                          </View>
                         </View>
-                        <Text style={styles.listItemSubtitle}>{orden.maquinariaNombre}</Text>
-                        <Text style={styles.listItemDescription} numberOfLines={2}>
-                          {orden.descripcionProblema}
-                        </Text>
-                        <View style={styles.listItemFooter}>
-                          <StatusBadge status={orden.estado} type="orden" size="small" />
-                          <Text style={styles.listItemDate}>{orden.fechaCreacion}</Text>
-                        </View>
-                      </View>
-                    ))}
+                      ))}
+                    </View>
                   </View>
-                </View>
-              )}
+                )}
             </>
           )}
         </ScrollView>
+        {isPanelVisible && (
+          <NotificationPanel onClose={() => setIsPanelVisible(false)} />
+        )}
       </View>
     </View>
   );
@@ -146,15 +193,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.industrial.background,
-    flexDirection: isWeb ? 'row' : 'column',
+    flexDirection: isWeb ? "row" : "column",
   },
   mainContent: {
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: Colors.industrial.backgroundSecondary,
@@ -166,7 +213,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.industrial.text,
     flex: 1,
     ...Platform.select({
@@ -175,31 +222,31 @@ const styles = StyleSheet.create({
     }),
   },
   headerActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   iconButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: Colors.industrial.surface,
-    position: 'relative',
+    position: "relative",
   },
   badge: {
-    position: 'absolute',
+    position: "absolute",
     top: 4,
     right: 4,
     backgroundColor: Colors.industrial.error,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 4,
   },
   badgeText: {
     color: Colors.industrial.text,
     fontSize: 10,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
   },
   content: {
     flex: 1,
@@ -209,8 +256,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 40,
   },
   loadingText: {
@@ -222,10 +269,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.industrial.text,
     marginBottom: 16,
-    textTransform: 'uppercase' as const,
+    textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
   kpiContainer: {
@@ -245,19 +292,19 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.industrial.border,
   },
   listItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   listItemTitle: {
     fontSize: 16,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.industrial.text,
   },
   listItemSubtitle: {
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.industrial.primary,
     marginBottom: 4,
   },
@@ -267,16 +314,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   listItemFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   listItemDate: {
     fontSize: 12,
     color: Colors.industrial.textMuted,
   },
   alertItem: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 12,
     gap: 12,
     borderBottomWidth: 1,
@@ -287,8 +334,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: `${Colors.industrial.warning}20`,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   alertIconText: {
     fontSize: 20,
@@ -298,7 +345,7 @@ const styles = StyleSheet.create({
   },
   alertTitle: {
     fontSize: 15,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.industrial.text,
     marginBottom: 4,
   },
@@ -311,10 +358,10 @@ const styles = StyleSheet.create({
   },
   operatorTitle: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.industrial.text,
     marginBottom: 24,
-    textAlign: 'center',
+    textAlign: "center",
   },
   operatorButtons: {
     gap: 20,
@@ -323,7 +370,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.industrial.primary,
     borderRadius: 16,
     padding: 32,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
   },
   operatorButtonDanger: {
@@ -334,8 +381,8 @@ const styles = StyleSheet.create({
   },
   operatorButtonLabel: {
     fontSize: 20,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.industrial.text,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
