@@ -196,10 +196,10 @@ const handleMachinePress = (maq: Maquinaria) => {
 
                     <View style={styles.cardFooter}>
                       <Text style={styles.cardFooterText}>
-                        Próximo mantenimiento:{" "}
-                        {maq.proximomantenimiento -
+                        Próximo mantenimiento:{" "}{(
+                        maq.proximomantenimiento -
                           (maq.horometro_actual -
-                            maq.horometro_ultimo_mtto)}{" "}
+                            maq.horometro_ultimo_mtto)).toFixed(2)}{" "}
                         hrs
                       </Text>
 
@@ -227,11 +227,11 @@ const handleMachinePress = (maq: Maquinaria) => {
         onSave={handleSaveSuccess}
       />
 
-      {/* --- AÑADE EL NUEVO MODAL AL FINAL --- */}
+     
       <NewWorkOrderModal
         visible={isWOMoalVisible}
         onClose={() => setIsWOModalVisible(false)}
-        onSave={handleSaveSuccess} // Reutilizamos la función de refrescar
+        onSave={handleSaveSuccess} 
         maquinaria={selectedMachine}
         user={currentUser}
       />

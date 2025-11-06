@@ -1,12 +1,13 @@
 // components/NewWorkOrderModal.tsx
-import React, { useState, useMemo } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Pressable, 
-  Modal, 
-  ActivityIndicator
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Modal,
+  ActivityIndicator,
+  TextInput
 } from 'react-native';
 import Colors from '@/constants/colors';
 import type { Maquinaria, User } from '@/types';
@@ -26,25 +27,39 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
   const [error, setError] = useState('');
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if (visible) {
+      setDescripcion('');
+      setError('');
+      setIsLoading(false);
+    }
+  }, [visible]);
+
   // Almacenamos la fecha de inicio en el momento que se abre el modal
   const inicioMtto = useMemo(() => {
     return new Date();
   }, [visible]); // Se recalcula solo cuando el modal se hace visible
 
+  const [descripcion, setDescripcion] = useState('');
+
   if (!maquinaria || !user) return null;
 
   const handleSubmit = async () => {
+
+    if (!descripcion) {
+      setError('La descripción es obligatoria.');
+      return;
+    }
     setIsLoading(true);
     setError('');
-
     const dataParaAPI = {
-      maquinariaId: maquinaria.maquinaria_id,
-      descripcionFalla: `Inicio de mantenimiento para ${maquinaria.nombre_equipo}`,
+      maquinariaId: maquinaria.maquinaria_id.toString(),
+      descripcionFalla: descripcion, 
       fechaInicio: inicioMtto.toISOString(),
     };
 
     try {
-      // 1. Llamamos a la nueva función del apiService (que crearemos en el paso 2.2)
+     
       await apiService.createOrdenInicioMtto(dataParaAPI);
 
       // 2. Refrescamos la lista de maquinaria para ver el estado actualizado
@@ -62,22 +77,24 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
     }
   };
 
+  const isAlreadyInMtto = maquinaria?.estado_actual === 'En mantenimiento';
+
+
   return (
     <Modal
-      animationType="fade"
+      animationType="slide"
       transparent={true}
       visible={visible}
       onRequestClose={onClose}
     >
       {/* Overlay para cerrar al presionar fuera */}
       <Pressable style={styles.overlay} onPress={onClose}>
-        <View 
+        <Pressable
           style={styles.modalContent}
-          // Evita que el clic en el modal cierre el modal
-          onStartShouldSetResponder={() => true}
+          
         >
           <Text style={styles.title}>Confirmar Inicio de Mantenimiento</Text>
-          
+
           <View style={styles.summary}>
             <SummaryRow label="Analista" value={user.nombre} />
             <SummaryRow label="Frente" value={maquinaria.nombre_frente} />
@@ -85,10 +102,32 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
             <SummaryRow label="ID Máquina" value={maquinaria.maquinaria_id.toString()} />
             <SummaryRow label="Horómetro" value={`${maquinaria.horometro_actual} hrs`} />
             <SummaryRow label="Inicio Mtto" value={inicioMtto.toLocaleString()} />
-            <SummaryRow label="Nuevo Estado" value="En Mantenimiento" isStatus={true} />
+            <SummaryRow
+              label="Nuevo Estado"
+              value={isAlreadyInMtto ? "Ya está 'En Mantenimiento'" : "En Mantenimiento"}
+              isStatus={true}
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Descripción (Falla/Trabajo):</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Ej: Falla en sistema hidráulico"
+              placeholderTextColor={Colors.industrial.textMuted}
+              value={descripcion}
+              onChangeText={setDescripcion}
+              multiline={true}
+              numberOfLines={3}
+              editable={!isLoading && !isAlreadyInMtto} // Deshabilitado si ya está en mtto
+            />
           </View>
 
           {error && <Text style={styles.errorText}>{error}</Text>}
+          {isAlreadyInMtto && (
+            <Text style={styles.warningText}>
+              Esta máquina ya se encuentra en mantenimiento.
+            </Text>
+          )}
 
           <View style={styles.buttonContainer}>
             <Pressable
@@ -99,24 +138,34 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </Pressable>
             <Pressable
-              style={({ pressed }) => [styles.button, styles.confirmButton, pressed && styles.pressed, isLoading && styles.disabled]}
+              style={({ pressed }) => [
+                styles.button,
+                styles.confirmButton,
+                pressed && styles.pressed,
+                (isLoading || isAlreadyInMtto) && styles.disabled // <--- CAMBIO
+              ]}
               onPress={handleSubmit}
-              disabled={isLoading}
+              disabled={isLoading || isAlreadyInMtto} // <--- CAMBIO
             >
-              {isLoading 
-                ? <ActivityIndicator color={Colors.industrial.text} /> 
+              {isLoading
+                ? <ActivityIndicator color={Colors.industrial.text} />
                 : <Text style={styles.confirmButtonText}>Confirmar</Text>
               }
             </Pressable>
           </View>
-        </View>
+        </Pressable>
       </Pressable>
     </Modal>
   );
 }
 
-// Pequeño componente helper para las filas del resumen
-const SummaryRow = ({ label, value, isStatus = false }) => (
+interface SummaryRowProps {
+  label: string;
+  value: string | number;
+  isStatus?: boolean;
+}
+
+const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, isStatus = false }) => (
   <View style={styles.row}>
     <Text style={styles.label}>{label}:</Text>
     <Text style={[styles.value, isStatus && styles.statusValue]}>{value}</Text>
@@ -130,6 +179,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 16,
+    color: Colors.industrial.textSecondary,
+    fontWeight: '500' as const,
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: Colors.industrial.backgroundTertiary,
+    borderWidth: 1,
+    borderColor: Colors.industrial.border,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+    color: Colors.industrial.text,
+    textAlignVertical: 'top',
+    minHeight: 80,
+  },
+  warningText: {
+    color: Colors.industrial.warning, // Color naranja
+    textAlign: 'center',
+    marginBottom: 16,
+    fontSize: 15,
+    fontWeight: '500' as const,
   },
   modalContent: {
     backgroundColor: Colors.industrial.surface,
@@ -148,7 +224,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   summary: {
-    marginBottom: 24,
+    marginBottom: 16,
     gap: 12,
   },
   row: {

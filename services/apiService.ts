@@ -71,9 +71,18 @@ export const apiService = {
         }
       );
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error creating work order:", error);
-      throw error.response?.data || new Error("Error creating work order");
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const respData = error.response.data;
+        if (typeof respData === "string") {
+          throw new Error(respData);
+        }
+        if (respData && typeof respData === "object" && "message" in respData) {
+          throw new Error((respData as any).message);
+        }
+      }
+      throw new Error("Error creating work order");
     }
   },
 
@@ -296,7 +305,6 @@ export const apiService = {
   },
 
   async getNotificaciones(): Promise<Notificacion[]> {
-    // 1. Esperamos 200ms (como en tu código original)
     await delay(200);
 
     // 2. Obtenemos las notificaciones estáticas (Stock, OT Completada, etc.)
@@ -309,21 +317,13 @@ export const apiService = {
       });
       
       const horometerNotifications: Notificacion[] = response.data;
-
-      // 4. Combinamos ambas listas
-      const allNotifications = [...horometerNotifications];
-
-      // 5. Ordenamos todas por fecha y las devolvemos
-      return allNotifications.sort(
+      return horometerNotifications.sort(
         (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
       );
 
     } catch (error) {
       console.error("Error fetching horometro notifications:", error);
-      // Si falla el backend, al menos devolvemos las estáticas
-      return staticNotifications.sort(
-        (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-      );
+      return [];
     }
   },
 
@@ -434,17 +434,17 @@ export const apiService = {
     ).slice(0, 5);
 
     const mantenimientosProximos = MOCK_MAQUINARIA.filter(
-      (m) =>
-        new Date(m.proximoMantenimiento) <=
-        new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
-    )
-      .map((m) => ({
-        maquinariaId: m.id,
-        maquinariaNombre: m.nombre,
-        fecha: m.proximoMantenimiento,
-        tipo: "Preventivo",
-      }))
-      .slice(0, 5);
+          (m) =>
+            new Date(m.proximoMantenimiento) <=
+            new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
+        )
+          .map((m) => ({
+            maquinariaId: m.id,
+            maquinariaNombre: m.nombre,
+            fecha: new Date(m.proximoMantenimiento).toISOString().split("T")[0],
+            tipo: "Preventivo",
+          }))
+          .slice(0, 5);
 
     const alertasInventario = MOCK_REPUESTOS.filter(
       (r) => r.stock <= r.stockMinimo

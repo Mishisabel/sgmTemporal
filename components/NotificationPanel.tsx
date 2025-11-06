@@ -1,12 +1,12 @@
 // Archivo: components/NotificationPanel.tsx
 
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Pressable, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
   ActivityIndicator,
   Platform
 } from 'react-native';
@@ -16,6 +16,8 @@ import Colors from '@/constants/colors';
 import { apiService } from '@/services/apiService';
 import type { Notificacion } from '@/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Link } from 'expo-router';
+import { linkTo } from 'expo-router/build/global-state/routing';
 
 interface NotificationPanelProps {
   onClose: () => void;
@@ -23,12 +25,12 @@ interface NotificationPanelProps {
 
 export default function NotificationPanel({ onClose }: NotificationPanelProps) {
   const insets = useSafeAreaInsets();
-  
+
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['notificaciones'],
     queryFn: apiService.getNotificaciones,
-    // Opcional: Refresca las notificaciones cada 30 segundos
-    refetchInterval: 30000, 
+    // Opcional: Refresca las notificaciones cada 10 segundos
+    refetchInterval: 10000,
   });
 
   const getIcon = (tipo: Notificacion['tipo']) => {
@@ -47,17 +49,17 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
 
   return (
     // Usamos un Pressable como overlay para cerrar al tocar fuera
-    <Pressable style={[styles.overlay]} onPress={onClose}>
-      <View 
+    <Pressable style={styles.overlay} onPress={onClose}>
+      <View
         style={[
-          styles.panel, 
-          { 
-            paddingTop: insets.top || 16, 
-            paddingBottom: insets.bottom || 16 
+          styles.panel,
+          {
+            paddingTop: insets.top || 16,
+            paddingBottom: insets.bottom || 16
           }
         ]}
         // Evita que el clic en el panel cierre el modal
-        onStartShouldSetResponder={() => true} 
+        onStartShouldSetResponder={() => true}
       >
         <View style={styles.header}>
           <Text style={styles.title}>Notificaciones</Text>
@@ -65,7 +67,7 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
             <X size={24} color={Colors.industrial.textSecondary} />
           </Pressable>
         </View>
-        
+
         {isLoading ? (
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={Colors.industrial.primary} />
@@ -77,10 +79,19 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
         ) : (
           <ScrollView style={styles.list}>
             {notifications.map((notif) => (
-              <View key={notif.id} style={[
-                styles.item, 
-                !notif.leida && styles.itemUnread
-              ]}>
+              <Pressable
+                key={notif.id}
+                style={[
+                  styles.item,
+                  !notif.leida && styles.itemUnread,
+                  { cursor: 'pointer' },
+                ]}
+                onPress={() => {
+                  if (notif.enlace) {
+                    linkTo(notif.enlace as any);
+                  }
+                }}
+              >
                 <View style={styles.itemIcon}>
                   {getIcon(notif.tipo)}
                 </View>
@@ -91,7 +102,7 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
                     {new Date(notif.fecha).toLocaleString()}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             ))}
           </ScrollView>
         )}
@@ -113,6 +124,7 @@ const styles = StyleSheet.create({
       web: {
         // En web, 'fixed' funciona mejor para el overlay
         position: 'fixed' as any,
+        cursor: 'default' as any,
       }
     })
   },

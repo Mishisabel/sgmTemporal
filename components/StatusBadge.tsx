@@ -14,7 +14,7 @@ export default function StatusBadge({ status, type = 'maquinaria', size = 'mediu
       switch (status) {
         case 'Activo':
           return Colors.industrial.statusOperativo;
-        case 'En Mantenimiento':
+        case 'En mantenimiento':
           return Colors.industrial.statusMantenimiento;
         case 'Productivo':
           return Colors.industrial.statusProductivo;

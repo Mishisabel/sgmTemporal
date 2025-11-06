@@ -17,28 +17,35 @@ export default function MantenimientoBadge({
   estado,
 }: StatusBadgeProps) {
   const getStatusColor = () => {
-    
-    if (estado !== undefined) {
-      if (estado <= 4) {
-        return Colors.industrial.error;
-      } else if (estado >= 5 && estado <= 9) {
-        return Colors.industrial.warning;
-      } else if (estado > 9 && estado <= 22) {
-        return Colors.industrial.success;
+
+    if (status != "En mantenimiento") {
+      if (estado !== undefined) {
+        if (estado < 5) {
+          return Colors.industrial.error;
+        } else if (estado >= 5 && estado <= 9) {
+          return Colors.industrial.warning;
+        } else if (estado > 9 && estado <= 22) {
+          return Colors.industrial.success;
+        }
       }
+      return Colors.industrial.textSecondary;
+    } else {
+      return Colors.industrial.statusMantenimiento;
     }
-    return Colors.industrial.textSecondary;
   };
 
   const getStatus = () => {
-    
-    if (estado !== undefined) {
-      if (estado <= 4) {
-        return "Por favor realizar mantenimiento";
-      } else if (estado >= 5 && estado <= 9) {
-        return "Proximo mantenimiento";
-      } else if (estado > 9 && estado <= 22) {
-        return "Mantenimiento al dia";
+    if (status === "En mantenimiento") {
+      return "En mantenimiento";
+    } else {
+      if (estado !== undefined) {
+        if (estado < 5) {
+          return "Por favor realizar mantenimiento";
+        } else if (estado >= 5 && estado <= 9) {
+          return "Proximo mantenimiento";
+        } else if (estado > 9 && estado <= 22) {
+          return "Mantenimiento al dia";
+        }
       }
     }
     return "hola";
