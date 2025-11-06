@@ -1,4 +1,4 @@
-export type UserRole = 'Operador' | 'Analista' | 'Coordinador' | 'Gerencia';
+export type UserRole = "Operador" | "Analista" | "Coordinador" | "Gerencia";
 
 export interface User {
   id: string;
@@ -9,7 +9,7 @@ export interface User {
   avatarUrl?: string;
 }
 
-export interface MaquinariaEstado{
+export interface MaquinariaEstado {
   id_estado?: string;
   estado?: string;
 }
@@ -36,14 +36,17 @@ export interface Maquinaria {
   horometro_ultimo_mtto: number;
   proximomantenimiento: number;
   nombre_frente: string;
-  maquinaria_id :number;
-  
-
+  maquinaria_id: number;
 }
 
-export type OrdenTrabajoTipo = 'Preventivo' | 'Correctivo' | 'Predictivo';
-export type OrdenTrabajoEstado = 'Abierta' | 'En Progreso' | 'Pendiente Repuesto' | 'Cerrada' | 'Cancelada';
-export type OrdenTrabajoPrioridad = 'Baja' | 'Media' | 'Alta';
+export type OrdenTrabajoTipo = "Preventivo" | "Correctivo" | "Predictivo";
+export type OrdenTrabajoEstado =
+  | "Abierta"
+  | "En Progreso"
+  | "Pendiente Repuesto"
+  | "Cerrada"
+  | "Cancelada";
+export type OrdenTrabajoPrioridad = "Baja" | "Media" | "Alta";
 
 export interface OrdenTrabajo {
   id: string;
@@ -105,7 +108,7 @@ export interface Proveedor {
 
 export interface Notificacion {
   id: string;
-  tipo: 'alerta' | 'info' | 'warning' | 'success';
+  tipo: "alerta" | "info" | "warning" | "success";
   titulo: string;
   mensaje: string;
   fecha: string;
@@ -117,7 +120,7 @@ export interface KPI {
   nombre: string;
   valor: number;
   unidad: string;
-  tendencia?: 'up' | 'down' | 'stable';
+  tendencia?: "up" | "down" | "stable";
   cambio?: number;
   objetivo?: number;
 }
@@ -137,6 +140,20 @@ export interface DashboardData {
     stock: number;
     stockMinimo: number;
   }>;
+}
 
-  
+export interface ChatUser {
+  id: string;
+  nombre: string;
+  rol: UserRole;
+}
+
+// Interfaz para un solo mensaje
+export interface Mensaje {
+  mensaje_id: number;
+  remitente_id: string;
+  destinatario_id: string;
+  cuerpo: string;
+  fecha_envio: string;
+  leido: boolean;
 }

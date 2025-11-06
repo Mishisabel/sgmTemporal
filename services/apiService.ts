@@ -8,6 +8,8 @@ import type {
   Notificacion,
   DashboardData,
   KPI,
+  ChatUser,
+  Mensaje
 } from "@/types";
 import {
   MOCK_MAQUINARIA,
@@ -52,6 +54,38 @@ export const apiService = {
     } catch (error) {
       console.error("Error creating maquinaria:", error);
       throw new Error("Error creating maquinaria");
+    }
+  },
+
+
+  async getUsuariosChat(): Promise<ChatUser[]> {
+    try {
+      const response = await axios.get(`${API_URL}/usuarios/lista`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user list:", error);
+      throw new Error("Error fetching user list");
+    }
+  },
+
+  async getHistorialChat(otroUsuarioId: string): Promise<Mensaje[]> {
+    try {
+      const response = await axios.get(
+        `${API_URL}/mensajes/historial/${otroUsuarioId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      throw new Error("Error fetching chat history");
     }
   },
 

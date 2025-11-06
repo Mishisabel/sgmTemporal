@@ -143,6 +143,18 @@ CREATE TABLE OT_Repuestos (
     UNIQUE(ot_id, repuesto_id) -- Evita duplicar el mismo repuesto en la misma OT
 );
 
+CREATE TABLE Mensajes (
+    mensaje_id SERIAL PRIMARY KEY,
+    remitente_id INT NOT NULL,  -- Quien envía (Usuario ID)
+    destinatario_id INT NOT NULL, -- Quien recibe (Usuario ID)
+    cuerpo TEXT NOT NULL,
+    fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    leido BOOLEAN DEFAULT FALSE,
+    
+    FOREIGN KEY (remitente_id) REFERENCES Usuarios(usuario_id) ON DELETE CASCADE,
+    FOREIGN KEY (destinatario_id) REFERENCES Usuarios(usuario_id) ON DELETE CASCADE
+);
+
 -- Insertar datos base (Roles)
 INSERT INTO Roles (nombre_rol) VALUES ('Operador'), ('Analista'), ('Coordinador'), ('Gerencia'), ('Técnico');
 INSERT INTO TiposMantenimiento (nombre) VALUES ('Preventivo'), ('Correctivo'), ('Predictivo'), ('Programado');

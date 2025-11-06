@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Users,
   LogOut,
+  MessageSquare,
   Menu,
   X,
 } from 'lucide-react-native';
@@ -40,6 +41,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       icon: <LayoutDashboard size={20} color={Colors.industrial.textSecondary} />,
       href: '/dashboard',
       roles: ['Operador', 'Analista', 'Coordinador', 'Gerencia'],
+    },
+    {
+      id: 'chat',
+      label: 'Chat',
+      icon: <MessageSquare size={20} color={Colors.industrial.textSecondary} />,
+      href: '/chat',
+      roles: ['Operador', 'Analista', 'Coordinador', 'Gerencia'], // Todos pueden chatear
     },
     {
       id: 'machinery',
