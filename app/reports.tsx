@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Platform, Pressable, ScrollView, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Menu, FileText, BarChart3 } from 'lucide-react-native';
+import { Menu, FileText, BarChart3,Bell } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import Sidebar from '@/components/Sidebar';
+import { useQuery } from "@tanstack/react-query";
+import { apiService } from "@/services/apiService";
 
 const isWeb = Platform.OS === 'web';
 
@@ -16,6 +18,13 @@ export default function ReportsScreen() {
     { id: '2', title: 'Costos por OT', icon: <BarChart3 size={32} color={Colors.industrial.accent} />, description: 'Análisis de costos operativos' }
    
   ];
+
+
+   const { data: notificaciones } = useQuery({
+    queryKey: ["notificaciones"],
+    queryFn: () => apiService.getNotificaciones(),
+  });
+  const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
 
   return (
     <View style={styles.container as ViewStyle}>
@@ -30,6 +39,19 @@ export default function ReportsScreen() {
           )}
           
           <Text style={styles.headerTitle}>Reportes</Text>
+
+          <View style={styles.headerActions}>
+            <Pressable style={styles.iconButton}>
+              <Bell size={20} color={Colors.industrial.textSecondary} />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount}</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
+          
+          
         </View>
 
         <ScrollView 
@@ -148,5 +170,32 @@ const styles = StyleSheet.create({
     color: Colors.industrial.text,
     fontSize: 14,
     fontWeight: '600' as const,
+  },
+  badgeText: {
+    color: Colors.industrial.text,
+    fontSize: 10,
+    fontWeight: '700' as const,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.industrial.surface,
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: Colors.industrial.error,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
   },
 });

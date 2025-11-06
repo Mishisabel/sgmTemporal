@@ -13,11 +13,12 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import { Menu, Plus, Search, Filter } from "lucide-react-native";
+import { Menu, Plus, Search, Filter, Bell } from "lucide-react-native";
 import Colors from "@/constants/colors";
 import { apiService } from "@/services/apiService";
 import type { Maquinaria, MaquinariaEstado } from "@/types";
 import Sidebar from "@/components/Sidebar";
+
 import StatusBadge from "@/components/StatusBadge";
 import MantenimientoBadge from "@/components/statusMantenimiento";
 import { Image } from "expo-image";
@@ -30,6 +31,12 @@ export default function MachineryScreen() {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const { data: notificaciones } = useQuery({
+    queryKey: ["notificaciones"],
+    queryFn: () => apiService.getNotificaciones(),
+  });
+  const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
 
   const {
     data: maquinaria,
@@ -75,7 +82,16 @@ export default function MachineryScreen() {
           )}
 
           <Text style={styles.headerTitle}>Maquinaria</Text>
-
+          <View style={styles.headerActions}>
+            <Pressable style={styles.iconButton}>
+              <Bell size={20} color={Colors.industrial.textSecondary} />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount}</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
           <Pressable
             style={styles.addButton}
             onPress={() => setIsModalVisible(true)}
@@ -124,11 +140,15 @@ export default function MachineryScreen() {
                   <View style={styles.cardContent}>
                     <View style={styles.cardHeader}>
                       <View>
-                        <Text style={styles.cardCode}>{maq.codigo_activo} - {maq.nombre_frente}</Text>
-                        <Text style={styles.cardTitle}>{maq.nombre_equipo}</Text>
+                        <Text style={styles.cardCode}>
+                          {maq.codigo_activo} - {maq.nombre_frente}
+                        </Text>
+                        <Text style={styles.cardTitle}>
+                          {maq.nombre_equipo}
+                        </Text>
                       </View>
                       <StatusBadge
-                        status={String(maq.estado_actual) || "Desconocido"}//cambiaarrrrrrrr
+                        status={String(maq.estado_actual) || "Desconocido"} //cambiaarrrrrrrr
                         type="maquinaria"
                         size="small"
                       />
@@ -140,13 +160,17 @@ export default function MachineryScreen() {
                         <Text style={styles.cardDetailValue}>{maq.modelo}</Text>
                       </View>
                       <View style={styles.cardDetailRow}>
-                        <Text style={styles.cardDetailLabel}>Horómetro actual:</Text>
+                        <Text style={styles.cardDetailLabel}>
+                          Horómetro actual:
+                        </Text>
                         <Text style={styles.cardDetailValue}>
                           {maq.horometro_actual} hrs
                         </Text>
                       </View>
-                       <View style={styles.cardDetailRow}>
-                        <Text style={styles.cardDetailLabel}>Horómetro último mantenimiento:</Text>
+                      <View style={styles.cardDetailRow}>
+                        <Text style={styles.cardDetailLabel}>
+                          Horómetro último mantenimiento:
+                        </Text>
                         <Text style={styles.cardDetailValue}>
                           {maq.horometro_ultimo_mtto} hrs
                         </Text>
@@ -156,14 +180,20 @@ export default function MachineryScreen() {
                     <View style={styles.cardFooter}>
                       <Text style={styles.cardFooterText}>
                         Próximo mantenimiento:{" "}
-                       {maq.proximomantenimiento-(maq.horometro_actual-maq.horometro_ultimo_mtto )} hrs
+                        {maq.proximomantenimiento -
+                          (maq.horometro_actual -
+                            maq.horometro_ultimo_mtto)}{" "}
+                        hrs
                       </Text>
 
                       <MantenimientoBadge
-                        status={String(maq.estado_actual) || "Desconocido"}//cambiaarrrrrrrr
+                        status={String(maq.estado_actual) || "Desconocido"} //cambiaarrrrrrrr
                         type="maquinaria"
                         size="small"
-                        estado={maq.proximomantenimiento - (maq.horometro_actual - maq.horometro_ultimo_mtto)}
+                        estado={
+                          maq.proximomantenimiento -
+                          (maq.horometro_actual - maq.horometro_ultimo_mtto)
+                        }
                       />
                     </View>
                   </View>
@@ -273,7 +303,6 @@ function MaquinariaFormModal({
 
         const frentes = await apiService.getFrentes();
 
-        // Normaliza la respuesta de frentes en caso de que la API devuelva string[]
         let normalizedFrentes: Frente[] = [];
         if (Array.isArray(frentes)) {
           if (frentes.length > 0 && typeof frentes[0] === "string") {
@@ -285,7 +314,6 @@ function MaquinariaFormModal({
             normalizedFrentes = frentes as unknown as Frente[];
           }
         }
-
         setDatafrentes(normalizedFrentes);
       } catch (error) {
         console.error("Error fetching estados:", error);
@@ -307,9 +335,8 @@ function MaquinariaFormModal({
     }
   };
 
-
   const handleSave = async () => {
-    if (!formData.codigoActivo ) {
+    if (!formData.codigoActivo) {
       setError("Código Activo es obligatorio");
       return;
     }
@@ -333,7 +360,9 @@ function MaquinariaFormModal({
         nombre_equipo: "",
         horometro_actual: 0,
         nombre_frente: "",
-        proximomantenimiento: 0
+        proximomantenimiento: 0,
+        horometro_prox_mtto: 0,
+        horometro_ultimo_mtto: 0,
       };
 
       console.log("Payload a enviar:", payload);
@@ -812,6 +841,33 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     backgroundColor: Colors.industrial.primary,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  iconButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.industrial.surface,
+    position: "relative",
+  },
+  badge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: Colors.industrial.error,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: Colors.industrial.text,
+    fontSize: 10,
+    fontWeight: "700" as const,
   },
   searchContainer: {
     flexDirection: "row",

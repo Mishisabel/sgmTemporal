@@ -35,7 +35,13 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerBackTitle: "Atrás" }}>
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+      <Stack.Screen name="machinery" options={{ headerShown: false }} />
+      <Stack.Screen name="work-orders" options={{ headerShown: false }} />
+      <Stack.Screen name="reports" options={{ headerShown: false }} />
+      <Stack.Screen name="inventory" options={{ headerShown: false }} />
+      <Stack.Screen name="suppliers" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
+
     </Stack>
   );
 }
