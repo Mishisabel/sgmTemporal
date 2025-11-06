@@ -173,8 +173,17 @@ export const apiService = {
   },
 
   async getOrdenesTrabajo(): Promise<OrdenTrabajo[]> {
-    await delay(300);
-    return [...MOCK_ORDENES_TRABAJO];
+    try {
+      const response = await axios.get(`${API_URL}/ordenes/todas`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching work orders:", error);
+      throw new Error("Error fetching work orders");
+    }
   },
 
   async getOrdenTrabajoById(id: string): Promise<OrdenTrabajo | undefined> {

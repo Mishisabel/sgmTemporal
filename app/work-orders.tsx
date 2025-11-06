@@ -27,7 +27,7 @@ const { data: notificaciones } = useQuery({
   });
   const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
 
-  return (
+  return (  
     <View style={styles.container}>
       {sidebarOpen && <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
       

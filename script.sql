@@ -92,6 +92,10 @@ CREATE TABLE Maquinaria (
 	FOREIGN KEY (estado_actual) REFERENCES estado(id_estado) ON DELETE SET NULL
 );
 
+CREATE TABLE prioridad(
+    id_prioridad serial primary key,
+    nivel_prioridad varchar(50)
+);
 
 -- 4. Entidades Transaccionales (Órdenes de Trabajo y Logs)
 CREATE TABLE OrdenesTrabajo (
@@ -106,12 +110,14 @@ CREATE TABLE OrdenesTrabajo (
     descripcion_falla TEXT,
     trabajo_realizado TEXT,
     estado_ot INT NOT NULL DEFAULT 0,
+    prioridad_ot INT NOT NULL DEFAULT 0,
     
     FOREIGN KEY (maquinaria_id) REFERENCES Maquinaria(maquinaria_id) ON DELETE CASCADE,
     FOREIGN KEY (tipo_mtto_id) REFERENCES TiposMantenimiento(tipo_mtto_id),
     FOREIGN KEY (solicitante_id) REFERENCES Usuarios(usuario_id) ON DELETE RESTRICT,
     FOREIGN KEY (tecnico_asignado_id) REFERENCES Usuarios(usuario_id) ON DELETE SET NULL,
 	FOREIGN KEY (estado_ot) REFERENCES estado(id_estado) ON DELETE SET NULL
+    FOREIGN KEY (prioridad_ot) REFERENCES prioridad(id_prioridad) ON DELETE SET NULL
 );
 
 CREATE TABLE HistorialHorometros (
@@ -145,4 +151,5 @@ INSERT INTO estado (estado) VALUES ('Activo'), ('Cerrado'), ('En proceso'), ('In
 INSERT INTO proveedormaquinaria(nombre_proveedor_maquinaria, contacto, telefono, email) VALUES ('Tecun', 'Juan Perez', '555-1234', 'juan.perez@example.com'),('cogecasa', 'pedro paz', '555-1234', 'Ppaz@example.com'), ('Madrisa', 'duglas cetino', '555-1234', 'dcetino@example.com');
 INSERT INTO frentes(analista_id,nombre_frente, descripcion, proveedor_id) VALUES (3,'Frente 15','Frente 15',1), (3,'Frente 16 ', 'Frente 16',1), (3,'Frente 17', ' Frente 17',1), (3,'Frente 18', ' Frente 18', 1);
 
+INSERT INTO prioridad(nivel_prioridad) VALUES ('Sin prioridad'), ('Baja'), ('Media'), ('Alta');
 
