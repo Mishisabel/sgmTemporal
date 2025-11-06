@@ -19,11 +19,11 @@ export default function WorkOrdersScreen() {
     queryFn: () => apiService.getOrdenesTrabajo(),
   });
 
-     const { data: notificaciones } = useQuery({
+     const { data: notificacion } = useQuery({
       queryKey: ["notificaciones"],
       queryFn: () => apiService.getNotificaciones(),
     });
-    const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
+    const unreadCount = notificacion?.filter((n) => !n.leida).length || 0;
   
   return (
     <View style={styles.container}>

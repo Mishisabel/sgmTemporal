@@ -21,9 +21,9 @@ export default function MantenimientoBadge({
     if (estado !== undefined) {
       if (estado <= 4) {
         return Colors.industrial.error;
-      } else if (estado >= 5 && estado <= 8) {
+      } else if (estado >= 5 && estado <= 9) {
         return Colors.industrial.warning;
-      } else if (estado >= 9 && estado <= 22) {
+      } else if (estado > 9 && estado <= 22) {
         return Colors.industrial.success;
       }
     }
@@ -35,13 +35,13 @@ export default function MantenimientoBadge({
     if (estado !== undefined) {
       if (estado <= 4) {
         return "Por favor realizar mantenimiento";
-      } else if (estado >= 5 && estado <= 8) {
+      } else if (estado >= 5 && estado <= 9) {
         return "Proximo mantenimiento";
-      } else if (estado >= 9 && estado <= 22) {
+      } else if (estado > 9 && estado <= 22) {
         return "Mantenimiento al dia";
       }
     }
-    return Colors.industrial.textSecondary;
+    return "hola";
   };
 
   const color = getStatusColor();

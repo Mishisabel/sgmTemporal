@@ -274,10 +274,37 @@ export const apiService = {
   },
 
   async getNotificaciones(): Promise<Notificacion[]> {
+    // 1. Esperamos 200ms (como en tu código original)
     await delay(200);
-    return [...MOCK_NOTIFICACIONES].sort(
-      (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-    );
+
+    // 2. Obtenemos las notificaciones estáticas (Stock, OT Completada, etc.)
+    const staticNotifications = [...MOCK_NOTIFICACIONES];
+
+    try {
+      // 3. Obtenemos las notificaciones dinámicas del horómetro desde el backend
+      const response = await axios.get(`${API_URL}/notificaciones/horometro`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      
+      const horometerNotifications: Notificacion[] = response.data;
+
+      // 4. Combinamos ambas listas
+      const allNotifications = [...staticNotifications, ...horometerNotifications];
+
+      // 5. Ordenamos todas por fecha y las devolvemos
+      return allNotifications.sort(
+        (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+      );
+
+    } catch (error) {
+      console.error("Error fetching horometro notifications:", error);
+      // Si falla el backend, al menos devolvemos las estáticas
+      return staticNotifications.sort(
+        (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+      );
+    }
   },
 
   async markNotificacionLeida(id: string): Promise<void> {
