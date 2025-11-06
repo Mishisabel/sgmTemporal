@@ -16,8 +16,8 @@ export default function StatusBadge({ status, type = 'maquinaria', size = 'mediu
           return Colors.industrial.statusOperativo;
         case 'En Mantenimiento':
           return Colors.industrial.statusMantenimiento;
-        case 'Averiado':
-          return Colors.industrial.statusAveriado;
+        case 'Productivo':
+          return Colors.industrial.statusProductivo;
         case 'Fuera de Servicio':
           return Colors.industrial.statusFueraServicio;
         default:

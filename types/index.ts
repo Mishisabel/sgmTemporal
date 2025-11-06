@@ -32,7 +32,8 @@ export interface Maquinaria {
   frente: string;
   codigo_activo: string;
   nombre_equipo: string;
-  horometro_prox_mtto?: number;
+  horometro_prox_mtto: number;
+  horometro_ultimo_mtto: number;
   proximomantenimiento: number;
   nombre_frente: string;
   

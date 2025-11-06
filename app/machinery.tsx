@@ -19,6 +19,7 @@ import { apiService } from "@/services/apiService";
 import type { Maquinaria, MaquinariaEstado } from "@/types";
 import Sidebar from "@/components/Sidebar";
 import StatusBadge from "@/components/StatusBadge";
+import MantenimientoBadge from "@/components/statusMantenimiento";
 import { Image } from "expo-image";
 
 const isWeb = Platform.OS === "web";
@@ -47,7 +48,8 @@ export default function MachineryScreen() {
       m.nombre_frente.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.estado_actual.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.horometro_actual.toString().includes(searchQuery.toString()) ||
-      m.proximomantenimiento.toString().includes(searchQuery.toString())
+      m.proximomantenimiento.toString().includes(searchQuery.toString()) ||
+      m.horometro_ultimo_mtto.toString().includes(searchQuery.toString())
   );
   console.log("Maquinaria filtrada:", filteredMaquinaria);
 
@@ -138,9 +140,15 @@ export default function MachineryScreen() {
                         <Text style={styles.cardDetailValue}>{maq.modelo}</Text>
                       </View>
                       <View style={styles.cardDetailRow}>
-                        <Text style={styles.cardDetailLabel}>Horómetro:</Text>
+                        <Text style={styles.cardDetailLabel}>Horómetro actual:</Text>
                         <Text style={styles.cardDetailValue}>
                           {maq.horometro_actual} hrs
+                        </Text>
+                      </View>
+                       <View style={styles.cardDetailRow}>
+                        <Text style={styles.cardDetailLabel}>Horómetro último mantenimiento:</Text>
+                        <Text style={styles.cardDetailValue}>
+                          {maq.horometro_ultimo_mtto} hrs
                         </Text>
                       </View>
                     </View>
@@ -148,8 +156,15 @@ export default function MachineryScreen() {
                     <View style={styles.cardFooter}>
                       <Text style={styles.cardFooterText}>
                         Próximo mantenimiento:{" "}
-                       {maq.proximomantenimiento - maq.horometro_actual} hrs
+                       {maq.proximomantenimiento-(maq.horometro_actual-maq.horometro_ultimo_mtto )} hrs
                       </Text>
+
+                      <MantenimientoBadge
+                        status={String(maq.estado_actual) || "Desconocido"}//cambiaarrrrrrrr
+                        type="maquinaria"
+                        size="small"
+                        estado={maq.proximomantenimiento - (maq.horometro_actual - maq.horometro_ultimo_mtto)}
+                      />
                     </View>
                   </View>
                 </Pressable>

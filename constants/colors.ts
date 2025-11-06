@@ -27,10 +27,11 @@ export default {
     border: '#374151',
     borderLight: '#4b5563',
     
-    statusOperativo: '#10b981',
-    statusMantenimiento: '#f59e0b',
+    statusOperativo: '#eaea07ff',
+    statusMantenimiento: '#0b26f5ff',
     statusAveriado: '#ef4444',
     statusFueraServicio: '#6b7280',
+    statusProductivo: '#10b981',
     
     prioridadAlta: '#ef4444',
     prioridadMedia: '#f59e0b',
