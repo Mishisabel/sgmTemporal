@@ -40,7 +40,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: 'Dashboard',
       icon: <LayoutDashboard size={20} color={Colors.industrial.textSecondary} />,
       href: '/dashboard',
-      roles: ['Operador', 'Analista', 'Coordinador', 'Gerencia'],
+      roles: [ 'Analista', 'Coordinador', 'Gerencia'],
     },
     {
       id: 'chat',
@@ -54,7 +54,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: 'Maquinaria',
       icon: <Settings size={20} color={Colors.industrial.textSecondary} />,
       href: '/machinery',
-      roles: ['Analista', 'Coordinador', 'Gerencia'],
+      roles: ['Operador','Analista', 'Coordinador', 'Gerencia'],
     },
     {
       id: 'work-orders',

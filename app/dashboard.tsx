@@ -41,41 +41,7 @@ export default function DashboardScreen() {
 
   const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
 
-  if (currentUser?.rol === "Operador") {
-    return (
-      <View
-        style={[
-          styles.container,
-          { paddingTop: insets.top, paddingBottom: insets.bottom },
-        ]}
-      >
-        <View style={[styles.header, { paddingTop: insets.top }]}>
-          <Text style={styles.headerTitle}>Panel del Operador</Text>
-        </View>
-        <ScrollView style={styles.content}>
-          <View style={styles.operatorContainer}>
-            <Text style={styles.operatorTitle}>Acciones Rápidas</Text>
-            <View style={styles.operatorButtons}>
-              <Pressable style={styles.operatorButton}>
-                <Text style={styles.operatorButtonText}>⏱️</Text>
-                <Text style={styles.operatorButtonLabel}>
-                  Actualizar Horómetro
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[styles.operatorButton, styles.operatorButtonDanger]}
-              >
-                <Text style={styles.operatorButtonText}>⚠️</Text>
-                <Text style={styles.operatorButtonLabel}>
-                  Reportar Incidencia
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </ScrollView>
-      </View>
-    );
-  }
+ 
 
   return (
     <View style={styles.container}>

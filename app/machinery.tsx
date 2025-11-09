@@ -32,6 +32,7 @@ export default function MachineryScreen() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(isWeb);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { currentUser } = useAuth();
+  const isOperador = currentUser?.rol === 'Operador';
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
@@ -146,7 +147,7 @@ const handleMachinePress = (maq: Maquinaria) => {
           ) : (
             <View style={styles.grid}>
               {filteredMaquinaria?.map((maq) => (
-                <Pressable key={maq.maquinaria_id} style={styles.card} onPress={() => handleMachinePress(maq)}>
+                <Pressable disabled={isOperador} key={maq.maquinaria_id} style={styles.card} onPress={() => handleMachinePress(maq)}>
                   {maq.imagenUrl && (
                     <Image
                       source={{ uri: maq.imagenUrl }}
