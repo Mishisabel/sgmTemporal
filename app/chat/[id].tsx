@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Menu, Send, ArrowLeft } from 'lucide-react-native';
+import { Menu, Send, ArrowLeft, Check, CheckCheck} from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -48,23 +48,56 @@ const { data: historialData, isLoading: isLoadingHistory } = useQuery({
     }
   }, [historialData]);
 
-    // 2. Escuchar mensajes nuevos
+  useEffect(() => {
+      if (historialData) {
+        setMensajes(historialData);
+        
+        if (socket && currentUser) {
+          socket.emit("markAsRead", {
+            remitente_id: String(destinatarioId), 
+            destinatario_id: String(currentUser.id) 
+          });
+        }
+      }
+    }, [historialData, socket, currentUser, destinatarioId]);
+
+    
     useEffect(() => {
         if (!socket) return;
-
         const handleReceiveMessage = (mensajeRecibido: Mensaje) => {
-            // Solo añade el mensaje si es de este chat
             if (String(mensajeRecibido.remitente_id) === String(destinatarioId)) {
                 setMensajes((prevMensajes) => [...prevMensajes, mensajeRecibido]);
+                if (currentUser) {
+                    socket.emit("markAsRead", {
+                        remitente_id: String(destinatarioId),
+                        destinatario_id: String(currentUser.id),
+                    });
+                }
             }
         };
+        const handleMessagesRead = (data: { chatWithUserId: string }) => {
+          // Si el 'leído' es de la persona con la que estoy chateando
+          if (String(data.chatWithUserId) === String(destinatarioId)) {
+            // Actualiza todos mis mensajes a 'leido: true'
+            setMensajes(prevMensajes => 
+              prevMensajes.map(msg => 
+                msg.remitente_id === String(currentUser?.id) 
+                  ? { ...msg, leido: true } 
+                  : msg
+              )
+            );
+          }
+        };
+
 
         socket.on('receiveMessage', handleReceiveMessage);
+        socket.on('messagesRead', handleMessagesRead);
 
         return () => {
             socket.off('receiveMessage', handleReceiveMessage);
+           socket.off('messagesRead', handleMessagesRead);
         };
-    }, [socket, destinatarioId]);
+    }, [socket, destinatarioId, currentUser]);
 
     // 3. Enviar un mensaje
     const handleSendMessage = () => {
@@ -134,6 +167,16 @@ const { data: historialData, isLoading: isLoadingHistory } = useQuery({
                                 ]}
                             >
                                 <Text style={styles.messageText}>{msg.cuerpo}</Text>
+                                {isMyMessage && (
+                                    <View style={styles.readReceipt}>
+                                      {msg.leido ? (
+                                        <CheckCheck size={16} color={Colors.industrial.accentLight} /> // Leído (Doble check azul/amarillo)
+                                      ) : (
+                                        <Check size={16} color={Colors.industrial.textSecondary} /> // Enviado (Un check gris)
+                                      )}
+                                    </View>
+                                  )}
+
                             </View>
                         );
                     })}
@@ -214,6 +257,7 @@ const styles = StyleSheet.create({
     messageText: {
         fontSize: 15,
         color: Colors.industrial.text,
+        flex: 1,
     },
     inputContainer: {
         flexDirection: 'row',
@@ -244,4 +288,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    messageContent: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      gap: 8,
+    },
+  
+readReceipt: {
+      // Estilo para el check
+      marginBottom: 2, // Esto alinea el ícono con la base del texto
+    },
+    
 });

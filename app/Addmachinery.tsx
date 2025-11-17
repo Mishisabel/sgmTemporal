@@ -91,17 +91,24 @@ export default function MaquinariaFormModal({
     setIsLoading(true);
 
     try {
-      const payload: Omit<Maquinaria, "id"> = {
-        // frente: formData.frente,
+         const payload: Omit<Maquinaria, "id"> = {
+        nombre: "Cosechadora",
         codigo: formData.codigoActivo,
-        nombre: formData.nombreEquipo,
+        frente: formData.frente,
         modelo: formData.modelo,
         fabricante: formData.fabricante,
         fecha_Adquisicion: formData.fechaAdquisicion,
-        estado_actual: formData.estado as MaquinariaEstado,
+        estado_actual: formData.estado,
         horometro_Actual: formData.horometroActual,
-        proximoMantenimiento:
-          formData.fechaAdquisicion || new Date().toISOString().split("T")[0],
+        proximoMantenimiento: 0,
+        codigo_activo: "",
+        nombre_equipo: "",
+        horometro_actual: 0,
+        nombre_frente: "",
+        proximomantenimiento: 0,
+        horometro_prox_mtto: 0,
+        horometro_ultimo_mtto: 0,
+        maquinaria_id: 0
       };
 
       await apiService.createMaquinaria(payload);
