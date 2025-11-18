@@ -165,3 +165,9 @@ INSERT INTO frentes(analista_id,nombre_frente, descripcion, proveedor_id) VALUES
 
 INSERT INTO prioridad(nivel_prioridad) VALUES ('Sin prioridad'), ('Baja'), ('Media'), ('Alta');
 
+
+
+
+ALTER TABLE OrdenesTrabajo
+ADD COLUMN horometro_ingreso DECIMAL(10, 2),
+ADD COLUMN horometro_salida DECIMAL(10, 2);

@@ -23,6 +23,17 @@ export default function ReportsScreen() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(isWeb);
   const [isPanelVisible, setIsPanelVisible] = useState(false);
 
+  const handleGenerateReport = async (id: string) => {
+    if (id === '1') {
+      try {
+        await apiService.downloadReporteExcel();
+       
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const reportTypes = [
     {
       id: "1",
@@ -88,8 +99,9 @@ export default function ReportsScreen() {
                 <View style={styles.cardIcon}>{report.icon}</View>
                 <Text style={styles.cardTitle}>{report.title}</Text>
                 <Text style={styles.cardDescription}>{report.description}</Text>
-                <Pressable style={styles.generateButton}>
+                <Pressable style={styles.generateButton}  onPress={() => handleGenerateReport(report.id)}>
                   <Text style={styles.generateButtonText}>Generar Reporte</Text>
+                  
                 </Pressable>
               </Pressable>
             ))}

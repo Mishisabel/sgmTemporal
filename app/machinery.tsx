@@ -59,6 +59,7 @@ const handleMachinePress = (maq: Maquinaria) => {
   } = useQuery({
     queryKey: ["maquinaria"],
     queryFn: () => apiService.getMaquinaria(),
+    refetchInterval: 10000
   });
 
   const filteredMaquinaria = maquinaria?.filter(

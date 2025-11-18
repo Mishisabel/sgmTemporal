@@ -56,6 +56,7 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
       maquinariaId: maquinaria.maquinaria_id.toString(),
       descripcionFalla: descripcion, 
       fechaInicio: inicioMtto.toISOString(),
+      horometroIngreso: maquinaria.horometro_actual
     };
 
     try {

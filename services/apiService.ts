@@ -93,6 +93,7 @@ export const apiService = {
     maquinariaId: string;
     descripcionFalla: string;
     fechaInicio: string;
+    horometroIngreso: number;
   }): Promise<OrdenTrabajo> {
     try {
       const response = await axios.post(
@@ -117,6 +118,27 @@ export const apiService = {
         }
       }
       throw new Error("Error creating work order");
+    }
+  },
+  async downloadReporteExcel(): Promise<void> {
+    try {
+      const response = await axios.get(`${API_URL}/ordenes/reporte/excel`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        responseType: 'blob', 
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Reporte_Mantenimiento_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error al generar el reporte:", error);
+      throw new Error("No se pudo descargar el reporte");
     }
   },
 
