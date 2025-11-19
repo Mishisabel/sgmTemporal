@@ -40,6 +40,18 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
     return new Date();
   }, [visible]); // Se recalcula solo cuando el modal se hace visible
 
+
+ const getGuatemalaTime = () => {
+    const now = new Date();
+  
+    const guatemalaDateStr = now.toLocaleString("en-US", { timeZone: "America/Guatemala" });
+    const guatemalaDate = new Date(guatemalaDateStr);
+
+    return guatemalaDate;
+  };
+
+
+
   const [descripcion, setDescripcion] = useState('');
 
   if (!maquinaria || !user) return null;
@@ -52,10 +64,21 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
     }
     setIsLoading(true);
     setError('');
+
+    const fechaGuate = getGuatemalaTime(); 
+
+    const year = fechaGuate.getFullYear();
+    const month = String(fechaGuate.getMonth() + 1).padStart(2, '0');
+    const day = String(fechaGuate.getDate()).padStart(2, '0');
+    const hours = String(fechaGuate.getHours()).padStart(2, '0');
+    const minutes = String(fechaGuate.getMinutes()).padStart(2, '0');
+    const seconds = String(fechaGuate.getSeconds()).padStart(2, '0');
+    
+    const fechaInicioGuatemala = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     const dataParaAPI = {
       maquinariaId: maquinaria.maquinaria_id.toString(),
       descripcionFalla: descripcion, 
-      fechaInicio: inicioMtto.toISOString(),
+      fechaInicio: fechaInicioGuatemala,
       horometroIngreso: maquinaria.horometro_actual
     };
 
@@ -102,7 +125,7 @@ export default function NewWorkOrderModal({ visible, onClose, onSave, maquinaria
             <SummaryRow label="Máquina" value={maquinaria.nombre_equipo} />
             <SummaryRow label="ID Máquina" value={maquinaria.maquinaria_id.toString()} />
             <SummaryRow label="Horómetro" value={`${maquinaria.horometro_actual} hrs`} />
-            <SummaryRow label="Inicio Mtto" value={inicioMtto.toLocaleString()} />
+            <SummaryRow label="Inicio Mtto" value={inicioMtto.toLocaleString("es-GT", { timeZone: "America/Guatemala" })}/>
             <SummaryRow
               label="Nuevo Estado"
               value={isAlreadyInMtto ? "Ya está 'En Mantenimiento'" : "En Mantenimiento"}
