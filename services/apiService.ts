@@ -120,6 +120,28 @@ export const apiService = {
       throw new Error("Error creating work order");
     }
   },
+
+  async finalizarOrdenTrabajo(id: string, data: {
+    horometroSalida: number;
+    trabajoRealizado: string;
+  }): Promise<void> {
+    try {
+      await axios.put(
+        `${API_URL}/ordenes/finalizar/${id}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+    } catch (error: any) {
+      console.error("Error finishing work order:", error);
+      throw new Error(error.response?.data?.message || "Error al finalizar la orden");
+    }
+  },
+
+  
   async downloadReporteExcel(): Promise<void> {
     try {
       const response = await axios.get(`${API_URL}/ordenes/reporte/excel`, {

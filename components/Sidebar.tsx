@@ -61,7 +61,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: 'Órdenes de Trabajo',
       icon: <ClipboardList size={20} color={Colors.industrial.textSecondary} />,
       href: '/work-orders',
-      roles: ['Analista', 'Coordinador', 'Gerencia'],
+      roles: ['Analista', 'Coordinador', 'Gerencia', 'Operador'],
     },
     {
       id: 'reports',

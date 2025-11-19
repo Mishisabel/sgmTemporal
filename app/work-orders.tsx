@@ -8,6 +8,9 @@ import { apiService } from '@/services/apiService';
 import Sidebar from '@/components/Sidebar';
 import StatusBadge from '@/components/StatusBadge';
 import NotificationPanel from '@/components/NotificationPanel';
+import FinishWorkOrderModal from '@/components/FinishWorkOrderModal';
+import { useAuth } from '@/contexts/AuthContext';
+import type { OrdenTrabajo } from '@/types';
 
 const isWeb = Platform.OS === 'web';
 
@@ -26,6 +29,17 @@ const { data: notificaciones } = useQuery({
     queryFn: () => apiService.getNotificaciones(),
   });
   const unreadCount = notificaciones?.filter((n) => !n.leida).length || 0;
+
+const { currentUser } = useAuth(); // Obtén el usuario
+const [selectedOt, setSelectedOt] = useState<OrdenTrabajo | null>(null);
+  const [isFinishModalVisible, setIsFinishModalVisible] = useState(false);
+
+  const isOperador = currentUser?.rol === 'Operador';
+
+const handleFinishPress = (orden: OrdenTrabajo) => {
+    setSelectedOt(orden); // Guardamos la orden completa
+    setIsFinishModalVisible(true);
+  };
 
   return (  
     <View style={styles.container}>
@@ -66,6 +80,7 @@ const { data: notificaciones } = useQuery({
           ) : (
             ordenes?.map((orden) => (
               <Pressable key={orden.id} style={styles.card}>
+
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTitle}>{orden.id}</Text>
                   <StatusBadge status={orden.prioridad} type="prioridad" size="small" />
@@ -78,17 +93,34 @@ const { data: notificaciones } = useQuery({
                   <StatusBadge status={orden.estado} type="orden" size="small" />
                   <Text style={styles.cardDate}>{orden.fechaCreacion}</Text>
                 </View>
+                {isOperador && String(orden.estado) !== 'Cerrado' && (
+                  <Pressable 
+                    style={styles.finishButton}
+                    onPress={() => handleFinishPress(orden)}
+                  >
+                    <Text style={styles.finishButtonText}>Finalizar Mantenimiento</Text>
+                  </Pressable>
+                )}
               </Pressable>
             ))
           )}
         </ScrollView>
+        <FinishWorkOrderModal
+          visible={isFinishModalVisible}
+          onClose={() => setIsFinishModalVisible(false)}
+          onSave={() => console.log('Guardado')} // React Query ya actualiza solo
+          orden={selectedOt}
+        />
         {isPanelVisible && (
         <NotificationPanel onClose={() => setIsPanelVisible(false)} />
       )}
     </View>
       </View>
+      
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -205,4 +237,16 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       paddingHorizontal: 4,
     },
+     finishButton: {
+    marginTop: 12,
+    backgroundColor: Colors.industrial.success,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  finishButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
 });

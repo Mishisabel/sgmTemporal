@@ -52,6 +52,10 @@ export interface OrdenTrabajo {
   id: string;
   maquinariaId: string;
   maquinariaNombre?: string;
+  maquinariaCodigo?: string;
+  maquinariaModelo?: string;
+  maquinariaHorometro?: number;
+  horometroIngreso?: number;
   tipo: OrdenTrabajoTipo;
   descripcionProblema: string;
   descripcionTrabajo?: string;
